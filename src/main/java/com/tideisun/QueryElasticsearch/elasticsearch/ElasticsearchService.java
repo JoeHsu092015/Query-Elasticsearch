@@ -1,11 +1,9 @@
-package com.tideisun.QueryElasticsearch.elasticsearch;
+package com.tideisun.QueryElasticsearch.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tideisun.QueryElasticsearch.config.ElasticsearchConfiguration;
-import org.apache.http.HttpHost;
 import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.client.Node;
 import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -15,31 +13,35 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.elasticsearch.action.search.SearchResponse;
 
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@Repository
+@Component
 public class ElasticsearchService {
-    private final String INDEX = "kibana_sample_data_flights";
-    private final String TYPE = "_doc";
+    private final String INDEX = "logstash-2018*";
+    private final String TYPE = "doc";
+    private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchService.class);
 
-    @Autowired
     private RestHighLevelClient restHighLevelClient;
 
-    private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchService.class);
     private ObjectMapper objectMapper;
 
-    public ElasticsearchService(ObjectMapper objectMapper, RestHighLevelClient restHighLevelClient) {
+    @Autowired
+    public ElasticsearchService(ObjectMapper objectMapper,RestHighLevelClient restHighLevelClient) {
+        for (Node a : restHighLevelClient.getLowLevelClient().getNodes()) {
+
+            System.out.println("ElasticsearchService host names: "+a.getHost().getHostName());
+        }
+
         this.objectMapper = objectMapper;
         this.restHighLevelClient = restHighLevelClient;
-        System.out.println("call ElasticsearchService ");
     }
 
 
@@ -50,20 +52,24 @@ public class ElasticsearchService {
             searchRequest.types(TYPE);
             System.out.println("call searchRequest ");
             SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-            sourceBuilder.query(QueryBuilders.termQuery("DestWeather", "Rain"));
+            sourceBuilder.query(QueryBuilders.termQuery("host", "192.168.1.152"));
             sourceBuilder.from(0);
-            sourceBuilder.size(20);
+            sourceBuilder.size(5);
             sourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
-            String[] includeFields = new String[] {"OriginLocation", "DestLocation"};
-            String[] excludeFields = new String[] {"_type"};
-            sourceBuilder.fetchSource(includeFields,excludeFields);
-
-
-
-
             searchRequest.source(sourceBuilder);
             List<Map<String, Object>> responseMap = new ArrayList<>();
+
             Map<String, Object> tmpMap;
+
+            //restHighLevelClient = new RestHighLevelClient(
+            //        RestClient.builder(
+            //                new HttpHost("192.168.50.199", 9200, "http")));
+
+            for (Node a : restHighLevelClient.getLowLevelClient().getNodes()) {
+
+                System.out.println("searchRequest host names: "+a.getHost().getHostName());
+                //host names should be : 192.168.50.199
+            }
 
             SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
 
@@ -77,7 +83,7 @@ public class ElasticsearchService {
             LOG.info("hit value: "+hits.totalHits);
             return responseMap;
         } catch (java.io.IOException e) {
-            System.out.println(e.getLocalizedMessage());
+            System.out.println(e.getMessage());
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
