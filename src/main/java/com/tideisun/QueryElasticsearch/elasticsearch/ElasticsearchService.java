@@ -1,4 +1,4 @@
-package com.tideisun.QueryElasticsearch.service;
+package com.tideisun.QueryElasticsearch.elasticsearch;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.elasticsearch.action.search.SearchRequest;
