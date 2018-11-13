@@ -1,11 +1,8 @@
 package com.tideisun.QueryElasticsearch.elasticsearch;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tideisun.QueryElasticsearch.config.ElasticsearchConfiguration;
-import org.apache.http.HttpHost;
 import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -16,11 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.elasticsearch.action.search.SearchResponse;
-
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -34,14 +28,6 @@ public class ElasticsearchService {
     private RestHighLevelClient restHighLevelClient;
 
     private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchService.class);
-    private ObjectMapper objectMapper;
-
-    public ElasticsearchService(ObjectMapper objectMapper, RestHighLevelClient restHighLevelClient) {
-        this.objectMapper = objectMapper;
-        this.restHighLevelClient = restHighLevelClient;
-        System.out.println("call ElasticsearchService ");
-    }
-
 
     public List<Map<String, Object>> searchRequest(String queryString) {
         try {
