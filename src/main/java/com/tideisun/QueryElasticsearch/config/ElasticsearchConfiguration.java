@@ -58,7 +58,10 @@ public class ElasticsearchConfiguration extends AbstractFactoryBean {
             LOG.error(e.getMessage());
         }
 
+        for (Node a : restHighLevelClient.getLowLevelClient().getNodes()) {
 
+            System.out.println("buildClient host names: "+a.getHost().getHostName());
+        }
         return restHighLevelClient;
     }
 }
